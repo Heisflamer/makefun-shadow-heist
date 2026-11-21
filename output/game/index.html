@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SHADOW HEIST - Stealth Game</title>
+<style>body{margin:0;background:#0a0a12;color:#fff;font-family:sans-serif;text-align:center}canvas{background:#111827;display:block;margin:10px auto;border:2px solid #22c55e;border-radius:10px;max-width:95vw}button{background:#22c55e;border:0;padding:12px 18px;border-radius:10px;font-weight:700;margin:4px;color:#000}.hud{font-size:18px}</style></head>
+<body><h2>🕶️ SHADOW HEIST - Stealth Game</h2>
+<div class="hud">Level: <span id="lvl">1</span> | Keys: <span id="keys">0/1</span> | <span id="msg">Chukua key, epuka walinzi!</span></div>
+<canvas id="g" width="360" height="360"></canvas>
+<div><button onclick="move(0,-1)">⬆️</button></div>
+<div><button onclick="move(-1,0)">⬅️</button><button onclick="move(1,0)">➡️</button></div>
+<div><button onclick="move(0,1)">⬇️</button></div>
+<p>WASD / Arrow keys pia zinafanya kazi. Ukiguswa na mwanga mwekundu = umekamatwa!</p>
+<script>
+let c=document.getElementById('g'),x=c.getContext('2d'),level=1,hasKey=false;
+let p={x:30,y:320,r:10};
+let guards=[{x:180,y:120,dx:1.5,range:60,dir:1},{x:100,y:200,dx:1.2,range:50,dir:1}];
+let key={x:320,y:40},door={x:320,y:320};
+function draw(){
+ x.clearRect(0,0,360,360);
+ x.fillStyle='#1f2937';x.fillRect(0,0,360,360);
+ // door
+ x.fillStyle=hasKey?'#22c55e':'#f59e0b';x.fillRect(door.x-15,door.y-15,30,30);x.fillStyle='#000';x.font='12px sans-serif';x.fillText(hasKey?'OPEN':'DOOR',door.x-16,door.y+4);
+ // key
+ if(!hasKey){x.fillStyle='#facc15';x.beginPath();x.arc(key.x,key.y,8,0,7);x.fill();x.fillStyle='#000';x.fillText('K',key.x-3,key.y+3);}
+ // guards + vision
+ guards.forEach(g=>{
+   g.x+=g.dx*g.dir; if(g.x>300||g.x<60)g.dir*=-1;
+   x.fillStyle='rgba(239,68,68,0.25)';x.beginPath();x.moveTo(g.x,g.y);x.arc(g.x,g.y,g.range,0,7);x.fill();
+   x.fillStyle='#ef4444';x.beginPath();x.arc(g.x,g.y,12,0,7);x.fill();
+ });
+ // player
+ x.fillStyle='#3b82f6';x.beginPath();x.arc(p.x,p.y,p.r,0,7);x.fill();x.fillStyle='#fff';x.fillText('YOU',p.x-12,p.y+22);
+ // check
+ let d=Math.hypot(p.x-key.x,p.y-key.y); if(!hasKey&&d<18){hasKey=true;document.getElementById('keys').innerText='1/1';document.getElementById('msg').innerText='Una key! Nenda mlangoni!';}
+ guards.forEach(g=>{ if(Math.hypot(p.x-g.x,p.y-g.y)<g.range*0.75){document.getElementById('msg').innerText='UMEKAMATWA! Jaribu tena';p={x:30,y:320,r:10};hasKey=false;document.getElementById('keys').innerText='0/1';} });
+ if(hasKey&&Math.hypot(p.x-door.x,p.y-door.y)<22){
+   level++;document.getElementById('lvl').innerText=level;
+   if(level>3){document.getElementById('msg').innerText='🏆 UMESHINDA! Wewe ni Master Thief!';}
+   else{document.getElementById('msg').innerText='Level '+level+'! Chukua key tena!';p={x:30,y:320,r:10};hasKey=false;guards.push({x:200,y:80,dx:1.8,range:55,dir:-1});document.getElementById('keys').innerText='0/1';}
+ }
+ requestAnimationFrame(draw);
+}
+function move(dx,dy){p.x=Math.max(15,Math.min(345,p.x+dx*20));p.y=Math.max(15,Math.min(345,p.y+dy*20));}
+document.addEventListener('keydown',e=>{if(e.key=='ArrowUp'||e.key=='w')move(0,-1);if(e.key=='ArrowDown'||e.key=='s')move(0,1);if(e.key=='ArrowLeft'||e.key=='a')move(-1,0);if(e.key=='ArrowRight'||e.key=='d')move(1,0);});
+draw();
+</script></body></html>
